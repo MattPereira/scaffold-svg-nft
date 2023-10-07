@@ -1,72 +1,73 @@
-import Link from "next/link";
+import { NFTCard } from "./NFTCard";
 import type { NextPage } from "next";
-import { BugAntIcon, MagnifyingGlassIcon, SparklesIcon } from "@heroicons/react/24/outline";
+import { parseUnits } from "viem";
 import { MetaHeader } from "~~/components/MetaHeader";
+import { Spinner } from "~~/components/Spinner";
+import { useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth/";
 
 const Home: NextPage = () => {
-  return (
-    <>
-      <MetaHeader />
-      <div className="flex items-center flex-col flex-grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center mb-8">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/pages/index.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
-        </div>
+  const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
+    contractName: "DynamicSvgNft",
+    eventName: "CreatedNFT",
+    // Specify the starting block number from which to read events, this is a bigint.
+    fromBlock: 0n,
+    blockData: true,
+    // Apply filters to the event based on parameter names and values { [parameterName]: value },
+    // filters: { premium: true },
+    // If set to true it will return the transaction data for each event (default: false),
+    transactionData: true,
+    // If set to true it will return the receipt data for each event (default: false),
+    receiptData: true,
+  });
 
-        <div className="flex-grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col sm:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contract
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <SparklesIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Experiment with{" "}
-                <Link href="/example-ui" passHref className="link">
-                  Example UI
-                </Link>{" "}
-                to build your own UI.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-          </div>
-        </div>
+  const {
+    writeAsync: mint,
+    // isLoading,
+    // isMining,
+  } = useScaffoldContractWrite({
+    contractName: "DynamicSvgNft",
+    functionName: "mintNft",
+    args: [parseUnits("1700", 8)],
+    // The number of block confirmations to wait for before considering transaction to be confirmed (default : 1).
+    blockConfirmations: 1,
+    // The callback function to execute when the transaction is confirmed.
+    onBlockConfirmation: txnReceipt => {
+      console.log("Transaction blockHash", txnReceipt.blockHash);
+      console.log("Transaction Receipt", txnReceipt);
+    },
+  });
+
+  console.log(parseUnits("420", 8));
+
+  console.log("events", events);
+  return (
+    <div className="container mx-auto">
+      <MetaHeader />
+      <div className="flex items-center flex-col flex-grow pt-14">
+        <button className="btn btn-primary" onClick={() => mint()}>
+          mint
+        </button>
       </div>
-    </>
+      <div className="flex">
+        {isLoadingEvents ? (
+          <div className="flex justify-center items-center mt-8">
+            <Spinner width="65" height="65" />
+          </div>
+        ) : !events || events.length === 0 ? (
+          <div className="flex justify-center items-center mt-8">
+            <p>No events</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-14 mt-14">
+            {" "}
+            {events.map((event, index) => {
+              const { tokenId, highValue } = event.args;
+              return <NFTCard key={index} tokenId={tokenId} highValue={highValue} />;
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 

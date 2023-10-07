@@ -58,9 +58,6 @@ contract DynamicSvgNft is ERC721 {
             imageURI = i_highImageURI;
         }
 
-        // Convert tokenId to string and concatenate
-        string memory tokenName = string(abi.encodePacked(name(), " #", Strings.toString(tokenId)));
-
         return (
             string(
                 abi.encodePacked(
@@ -69,9 +66,12 @@ contract DynamicSvgNft is ERC721 {
                         bytes(
                             abi.encodePacked(
                                 '{"name":"',
-                                tokenName,
+                                name(),
                                 '", "description":"An NFT that changes based on the Chainlink Feed", ',
-                                '"attributes": [{"trait_type": "coolness", "value": 100}], "image":"',
+                                '"attributes": [{"trait_type": "coolness", "value": 100, "pivot_price": ',
+                                Strings.toString(uint256(s_tokenIdToHighValue[tokenId])),
+                                "}],",
+                                '"image":"',
                                 imageURI,
                                 '"}'
                             )
