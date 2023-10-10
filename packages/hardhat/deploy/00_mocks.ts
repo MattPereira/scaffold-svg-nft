@@ -16,8 +16,9 @@ const deployMocks: DeployFunction = async function (hre: HardhatRuntimeEnvironme
 
   const BASE_FEE = ethers.utils.parseEther("0.25"); // 0.25 is the premium. It costs 0.25 LINK per request
   const GAS_PRICE_LINK = 1e9; // calculated value based on the gas price of the chain
-  const DECIMALS = "18";
-  const INTIIAL_PRICE = ethers.utils.parseUnits("2000", "ether");
+  const DECIMALS = "8";
+  const INTIIAL_PRICE = ethers.utils.parseUnits("1579", 8);
+  console.log("INITIAL_PRICE: ", INTIIAL_PRICE);
 
   if (developmentChains.includes(network.name)) {
     log("Local network detected! Deploying mocks...");
@@ -34,6 +35,10 @@ const deployMocks: DeployFunction = async function (hre: HardhatRuntimeEnvironme
     });
     log("Mocks Deployed!");
     log("------------------------------------");
+    const mockPriceFeed = await hre.ethers.getContract("MockV3Aggregator");
+    const data = await mockPriceFeed.latestRoundData();
+    console.log("mockPriceFeed Price: ", data.answer.toString());
+    console.log("decimals()", await mockPriceFeed.decimals());
   }
 };
 

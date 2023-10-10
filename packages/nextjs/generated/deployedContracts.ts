@@ -5,7 +5,7 @@ const contracts = {
       name: "localhost",
       contracts: {
         BasicNft: {
-          address: "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+          address: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
           abi: [
             {
               inputs: [],
@@ -384,7 +384,7 @@ const contracts = {
           ],
         },
         DynamicSvgNft: {
-          address: "0x4A679253410272dd5232B3Ff7cF5dbB88f295319",
+          address: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
           abi: [
             {
               inputs: [
@@ -875,7 +875,7 @@ const contracts = {
           ],
         },
         MockV3Aggregator: {
-          address: "0x3Aa5ebB10DC797CAC828524e59A333d0A371443c",
+          address: "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0",
           abi: [
             {
               inputs: [
@@ -1175,7 +1175,7 @@ const contracts = {
           ],
         },
         RandomIpfsNft: {
-          address: "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44",
+          address: "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
           abi: [
             {
               inputs: [
@@ -1814,7 +1814,7 @@ const contracts = {
           ],
         },
         VRFCoordinatorV2Mock: {
-          address: "0x68B1D87F95878fE05B998F19b66F4baba5De1aed",
+          address: "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
           abi: [
             {
               inputs: [

@@ -68,7 +68,9 @@ export const NFTCard = ({ tokenId, highValue }: NFTCardProps) => {
         <Image height="500" width="500" src={image} alt="Shoes" />
       </figure>
       <div className="card-body">
-        <h2 className="card-title">{name}</h2>
+        <h2 className="card-title">
+          {name} #{tokenId.toString()}
+        </h2>
         <p>{description}</p>
         <p>Pivot Price: {highValue.toString()}</p>
       </div>

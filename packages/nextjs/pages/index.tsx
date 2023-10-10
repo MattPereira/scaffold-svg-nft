@@ -1,11 +1,20 @@
+import { useState } from "react";
 import { NFTCard } from "./NFTCard";
 import type { NextPage } from "next";
 import { parseUnits } from "viem";
 import { MetaHeader } from "~~/components/MetaHeader";
 import { Spinner } from "~~/components/Spinner";
-import { useScaffoldContractWrite, useScaffoldEventHistory } from "~~/hooks/scaffold-eth/";
+import { InputBase } from "~~/components/scaffold-eth/Input/InputBase";
+import {
+  useScaffoldContractRead,
+  useScaffoldContractWrite,
+  useScaffoldEventHistory,
+  useScaffoldEventSubscriber,
+} from "~~/hooks/scaffold-eth/";
 
 const Home: NextPage = () => {
+  const [priceInput, setPriceInput] = useState("");
+
   const { data: events, isLoading: isLoadingEvents } = useScaffoldEventHistory({
     contractName: "DynamicSvgNft",
     eventName: "CreatedNFT",
@@ -20,6 +29,26 @@ const Home: NextPage = () => {
     receiptData: true,
   });
 
+  // event subscriber does not trigger a re-render????
+  useScaffoldEventSubscriber({
+    contractName: "DynamicSvgNft",
+    eventName: "CreatedNFT",
+    // The listener function is called whenever a GreetingChange event is emitted by the contract.
+    // Parameters emitted by the event can be destructed using the below example
+    // for this example: event GreetingChange(address greetingSetter, string newGreeting, bool premium, uint256 value);
+    listener: logs => {
+      logs.map(log => {
+        const { tokenId, highValue } = log.args;
+        console.log(log.args);
+        console.log("tokenId", tokenId);
+        if (events) {
+          events.push({ args: { tokenId, highValue } });
+        }
+        console.log("events", events);
+      });
+    },
+  });
+
   const {
     writeAsync: mint,
     // isLoading,
@@ -27,7 +56,7 @@ const Home: NextPage = () => {
   } = useScaffoldContractWrite({
     contractName: "DynamicSvgNft",
     functionName: "mintNft",
-    args: [parseUnits("1700", 8)],
+    args: [parseUnits(priceInput, 8)], // matching chainlink's 8 decimals for ETH/USD price feed on sepolia
     // The number of block confirmations to wait for before considering transaction to be confirmed (default : 1).
     blockConfirmations: 1,
     // The callback function to execute when the transaction is confirmed.
@@ -37,13 +66,19 @@ const Home: NextPage = () => {
     },
   });
 
-  console.log(parseUnits("420", 8));
+  const { data: currentEthUsdPrice } = useScaffoldContractRead({
+    contractName: "MockV3Aggregator",
+    functionName: "latestAnswer",
+  });
 
-  console.log("events", events);
   return (
     <div className="container mx-auto">
       <MetaHeader />
-      <div className="flex items-center flex-col flex-grow pt-14">
+      <div className="text-center my-14">
+        <h4 className="text-3xl text-white">ETH/USD price: {currentEthUsdPrice?.toString()}</h4>
+      </div>
+      <div className="flex justify-center gap-4">
+        <InputBase prefix="$" value={priceInput} onChange={val => setPriceInput(val)} />
         <button className="btn btn-primary" onClick={() => mint()}>
           mint
         </button>

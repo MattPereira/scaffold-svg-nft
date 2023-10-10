@@ -48,12 +48,20 @@ contract DynamicSvgNft is ERC721 {
         return "data:application/json;base64,";
     }
 
+
+    /**
+     * 
+     * @param tokenId The token ID to query
+     * @dev both the price returned from chainlink and the highValue stored in the contract are 8 decimals extra
+     * so that the comparison matches
+     */
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "URI query for nonexistent token");
 
         string memory imageURI = i_lowImageURI;
 
         (, int256 price,,,) = i_priceFeed.latestRoundData(); // returns 8 decimals extra
+
         if (price >= s_tokenIdToHighValue[tokenId]) {
             imageURI = i_highImageURI;
         }
